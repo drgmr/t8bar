@@ -2,9 +2,16 @@
 
 A Screen Sharing touch bar utility.
 
+## State
+
+Relatively simple but arguably bad code is working - this was mostly an
+experiment of building something that's actually useful using Rust. Code
+improvements and bug fixes will come - eventually.
+
 ## Usage
 
-Create your configuration file with local hostnames and GitHub names of your mates, run the binary and enjoy.
+Create your configuration file with local hostnames and GitHub names of your
+ mates, run the binary and enjoy.
 
 In `~/.config/t8bar/config.json`:
 ```json
