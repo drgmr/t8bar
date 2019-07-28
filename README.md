@@ -2,6 +2,8 @@
 
 A Screen Sharing touch bar utility.
 
+![Example Image](/media/screenshot.png)
+
 ## Current State
 
 Relatively simple but arguably bad code is working - this was mostly an
