@@ -2,7 +2,7 @@
 
 A Screen Sharing touch bar utility.
 
-## State
+## Current State
 
 Relatively simple but arguably bad code is working - this was mostly an
 experiment of building something that's actually useful using Rust. Code
