@@ -2,10 +2,10 @@
 extern crate log;
 
 use std::env;
-
 use std::fs::File;
-use std::io::{copy, Read};
+use std::io::{copy, Read, Write};
 use std::path::PathBuf;
+use std::process::{Command, Stdio};
 
 use rubrail::ItemId;
 use rubrail::TTouchbar;
@@ -29,8 +29,6 @@ fn main() {
         .unwrap();
 
     nsapp.set_activation_policy(fruitbasket::ActivationPolicy::Prohibited);
-
-    // let bar_rc = Rc::new(RefCell::new(Touchbar::alloc("t8bar")));
 
     let stopper = nsapp.stopper();
     let mut touchbar = Touchbar::alloc("t8bar");
@@ -70,12 +68,42 @@ fn setup(touchbar: &mut Touchbar, stopper: fruitbasket::FruitStopper) {
             None,
             Box::new(move |_| {
                 info!("Button clicked - hostname: {}", hostname);
+                let child = Command::new("osascript")
+                    .stdin(Stdio::piped())
+                    .spawn()
+                    .unwrap();
+
+                info!("Spawned osascript");
+
+                let mut stdin = child.stdin.unwrap();
+                let script =
+                    format!(
+                        r#"tell application "Screen Sharing"
+                            activate
+                            tell application "System Events"
+                                keystroke "{}.local"
+                                keystroke return
+                                delay 1
+                                tell application "System Events"
+                                    click (radio button 1 of radio group 1 of window 1) of application process "Screen Sharing"
+                                    keystroke return
+                                end tell
+                            end tell
+                        end tell"#, hostname);
+
+                info!("Sending script");
+
+                stdin.write(&script.as_bytes()).unwrap();
+
+                info!("Done");
             }),
         );
         touchbar.update_button_width(&target_button_id, 50);
 
         button_ids.push(target_button_id);
     }
+
+    info!("Done building data for buttons");
 
     let quit_stopper = stopper.clone();
     let quit_button_id = touchbar.create_button(
