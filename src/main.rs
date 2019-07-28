@@ -46,6 +46,19 @@ fn setup(touchbar: &mut Touchbar, stopper: fruitbasket::FruitStopper) {
     let mut root_bar = touchbar.create_bar();
 
     let mut button_ids = Vec::<ItemId>::new();
+
+    let quit_stopper = stopper.clone();
+    let quit_button_id = touchbar.create_button(
+        None,
+        Some("Quit"),
+        Box::new(move |_| {
+            info!("Exit requested by user");
+            quit_stopper.stop();
+        }),
+    );
+
+    button_ids.push(quit_button_id);
+
     let image_base_path = PathBuf::from(env::var_os("TMPDIR").unwrap());
 
     for target in targets {
@@ -104,18 +117,6 @@ fn setup(touchbar: &mut Touchbar, stopper: fruitbasket::FruitStopper) {
     }
 
     info!("Done building data for buttons");
-
-    let quit_stopper = stopper.clone();
-    let quit_button_id = touchbar.create_button(
-        None,
-        Some("Quit"),
-        Box::new(move |_| {
-            info!("Exit requested by user");
-            quit_stopper.stop();
-        }),
-    );
-
-    button_ids.push(quit_button_id);
 
     touchbar.add_items_to_bar(&mut root_bar, button_ids);
 
