@@ -4,7 +4,7 @@ extern crate log;
 use std::env;
 
 use std::fs::File;
-use std::io::Read;
+use std::io::{copy, Read};
 use std::path::PathBuf;
 
 use rubrail::ItemId;
@@ -48,18 +48,31 @@ fn setup(touchbar: &mut Touchbar, stopper: fruitbasket::FruitStopper) {
     let mut root_bar = touchbar.create_bar();
 
     let mut button_ids = Vec::<ItemId>::new();
+    let image_base_path = PathBuf::from(env::var_os("TMPDIR").unwrap());
 
     for target in targets {
         info!("Building data for {} - {}", target.hostname, target.github);
 
+        let filepath = image_base_path
+            .clone()
+            .join(format!("{}.png", target.github));
+
+        let mut image_file = File::create(filepath.clone()).unwrap();
+        let mut request =
+            reqwest::get(&format!("https://github.com/{}.png", target.github)).unwrap();
+
+        copy(&mut request, &mut image_file).unwrap();
+
+        let image = touchbar.create_image_from_path(filepath.to_str().unwrap());
         let hostname = target.hostname.clone();
         let target_button_id = touchbar.create_button(
+            Some(&image),
             None,
-            Some(&hostname.clone()),
             Box::new(move |_| {
                 info!("Button clicked - hostname: {}", hostname);
-            })
+            }),
         );
+        touchbar.update_button_width(&target_button_id, 50);
 
         button_ids.push(target_button_id);
     }
@@ -99,4 +112,3 @@ fn targets_from_config() -> Vec<Target> {
 
     result
 }
-
